@@ -18,7 +18,8 @@ app.use("/products",productRoutes)
 
 
 mongoose.connect(process.env.MONGO_URI, {
-    family:4
+    useNewUrlParser: true,
+    useUnifiedTopology: true
 })
 .then(() => {
   console.log("✅ Successfully connected to MongoDB...");
