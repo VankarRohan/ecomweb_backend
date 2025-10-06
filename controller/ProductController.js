@@ -54,7 +54,7 @@ const getproducts = async (req, res, next) => {
 
         // Categories
         if (categories?.length) {
-            filter.categories = { $in: categories };
+            filter.category = { $in: categories };
         }
         // Price range
         if (minPrice || maxPrice) {

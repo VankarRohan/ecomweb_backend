@@ -16,7 +16,8 @@ const ProductsSchema = new mongoose.Schema(
       required: true,
     },
     img: {
-      type: String,
+      type: [String],
+      default: [],
       required: true,
     },
     price: {
@@ -36,12 +37,12 @@ const ProductsSchema = new mongoose.Schema(
       default: [],
     },
     color: {
-      type: [String], 
+      type: [String],
       default: [],
     },
     brand: {
       type: String,
-      default: "No Brand", 
+      default: "No Brand",
     },
   },
   { timestamps: true }
