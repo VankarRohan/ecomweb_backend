@@ -54,7 +54,17 @@ const getproducts = async (req, res, next) => {
 
         // Categories
         if (categories?.length) {
-            filter.category = { $in: categories };
+            let categoryArray = [];
+
+            if (Array.isArray(categories)) {
+                categoryArray = categories;
+            } else if (typeof categories === "string") {
+                categoryArray = categories.split(",").map(c => c.trim());
+            }
+
+            if (categoryArray.length > 0) {
+                filter.category = { $in: categoryArray };
+            }
         }
         // Price range
         if (minPrice || maxPrice) {
