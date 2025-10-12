@@ -46,60 +46,67 @@ const addProducts = async (req, res, next) => {
     }
 };
 
-const getproducts = async (req, res, next) => {
+const getproducts = async (req, res) => {
     try {
         let { categories, minPrice, maxPrice, sizes, search, color } = req.query;
-
         const filter = {};
 
-        // Categories
+        // 🟢 Categories
         if (categories?.length) {
-            let categoryArray = [];
+            const categoryArray = Array.isArray(categories)
+                ? categories
+                : categories.split(",").map(c => c.trim()).filter(Boolean);
 
-            if (Array.isArray(categories)) {
-                categoryArray = categories;
-            } else if (typeof categories === "string") {
-                categoryArray = categories.split(",").map(c => c.trim());
-            }
-
-            if (categoryArray.length > 0) {
+            if (categoryArray.length) {
                 filter.category = { $in: categoryArray };
             }
         }
-        // Price range
+
+        // 🟢 Price range
         if (minPrice || maxPrice) {
             filter["price.org"] = {};
             if (minPrice) filter["price.org"]["$gte"] = parseFloat(minPrice);
             if (maxPrice) filter["price.org"]["$lte"] = parseFloat(maxPrice);
         }
 
-        // Sizes
-        if (sizes) {
-            sizes = sizes.split(",").filter(s => s.trim() !== "");
-            if (sizes.length > 0) {
-                filter.sizes = { $in: sizes };
+        // 🟢 Sizes (ensure proper match for array)
+        if (sizes?.length) {
+            const sizeArray = Array.isArray(sizes)
+                ? sizes
+                : sizes.split(",").map(s => s.trim()).filter(Boolean);
+
+            if (sizeArray.length) {
+                // Match if product has *any* of these sizes in its array
+                filter.sizes = { $elemMatch: { $in: sizeArray } };
             }
         }
 
-        // Colors
-        if (color) {
-            color = color.split(",").filter(c => c.trim() !== "");
-            if (color.length > 0) {
-                filter.color = { $in: color };
+        // 🟢 Colors (ensure proper match for array)
+        if (color?.length) {
+            const colorArray = Array.isArray(color)
+                ? color
+                : color.split(",").map(c => c.trim()).filter(Boolean);
+
+            if (colorArray.length) {
+                // Match if product has *any* of these colors in its array
+                filter.color = { $elemMatch: { $in: colorArray } };
             }
         }
 
-        // Search (title or description)
-        if (search) {
+        // 🟢 Search (optional)
+        if (search?.trim()) {
+            const searchRegex = new RegExp(search.trim(), "i");
             filter.$or = [
-                { title: { $regex: new RegExp(search, "i") } },
-                { desc: { $regex: new RegExp(search, "i") } },
+                { title: { $regex: searchRegex } },
+                { desc: { $regex: searchRegex } },
+                { name: { $regex: searchRegex } }
             ];
         }
 
+        // 🔍 Fetch products
         const products = await productSchema.find(filter);
-        return res.status(200).json(products);
 
+        return res.status(200).json(products);
     } catch (err) {
         res.status(500).json({
             message: "Internal Server Error",
