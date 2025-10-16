@@ -209,10 +209,12 @@ const placeOrder = async (req, res) => {
             address,
         });
 
+          const savedOrder = await order.save();
+
         await userSchema.findByIdAndUpdate(
             userJWT.id,
             {
-                $push: { orders: order._id },
+                $push: { orders: savedOrder._id },
                 $set: { cart: [] }
             },
             { new: true } // return updated doc
