@@ -234,8 +234,10 @@ const placeOrder = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
     try {
-        const user = req.user;
-        const orders = await orderSchema.find({ user: user.id }).populate({
+        // const user = req.user;
+        console.log(req.user)
+        const userId = req.user._id || req.user.id;
+        const orders = await orderSchema.find({ user: userId }).populate({
             path: "products.product", // path to populate inside the array
             model: "Products",        // make sure this matches your Products model
         })
