@@ -192,7 +192,7 @@ const getAllCartItems = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        const { products, address, totalAmount } = req.body;
+        const { products, address, totalAmount, subtotal, shipping, tax, discount } = req.body;
         const userJWT = req.user; // set by verifyToken middleware
 
         // find logged-in user
@@ -207,9 +207,13 @@ const placeOrder = async (req, res) => {
             user: user._id,
             total_amount: parseFloat(totalAmount),
             address,
+            subtotal,
+            shipping,
+            tax,
+            discount,
         });
 
-          const savedOrder = await order.save();
+        const savedOrder = await order.save();
 
         await userSchema.findByIdAndUpdate(
             userJWT.id,

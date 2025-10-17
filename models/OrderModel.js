@@ -1,4 +1,4 @@
-const mongoose= require('mongoose');
+const mongoose = require('mongoose');
 
 const OrdersSchema = new mongoose.Schema(
   {
@@ -28,6 +28,27 @@ const OrdersSchema = new mongoose.Schema(
       type: String,
       default: "Payment Done",
     },
+    subtotal: {
+      type: mongoose.Decimal128,
+      required: true
+
+    },
+    shipping: {
+      type: mongoose.Decimal128,
+      required: true
+
+    },
+    tax: {
+      type: mongoose.Decimal128,
+      required: true
+
+    },
+    discount: {
+      type: mongoose.Decimal128,
+      default: 0
+
+    }
+
   },
   { timestamps: true }
 );
