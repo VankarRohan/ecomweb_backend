@@ -42,7 +42,22 @@ const userRegister = async (req, res) => {
     }
 
 }
+const getUser = async (req, res) => {
 
+    try {
+        const user = await userSchema.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        return res.status(200).json({ message: "User fetched successfully", data: user });
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            message: "Internal Server Error",
+            data: error
+        });
+    }
+}
 const updateUser = async (req, res) => {
 
     try {
@@ -366,5 +381,6 @@ module.exports = {
     addToFavorites,
     removeFromFavorites,
     getUserFavourites,
-    updateUser
+    updateUser,
+    getUser
 }

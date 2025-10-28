@@ -3,6 +3,7 @@ const userController = require("../controller/UserController")
 const verifytoken = require("../middleware/VerifyUser")
 
 router.post("/user",userController.userRegister)
+router.get("/user/:id",userController.getUser)
 router.delete("/user/:id",userController.deleteuser)
 router.put("/user/:id",userController.updateUser)
 router.post("/user/login",userController.userlogin)
