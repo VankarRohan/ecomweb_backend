@@ -43,6 +43,36 @@ const userRegister = async (req, res) => {
 
 }
 
+const updateUser = async (req, res) => {
+
+    try {
+        // const { name , email } = req.body
+        const updateduser = await userModel.findByIdAndUpdate(req.params.id, req.body)
+
+        if (updateduser != null) {
+
+            res.status(200).json({
+                message: "User updated successfully...",
+                // data : updateduser,
+                flag: 1
+            })
+
+        } else {
+
+            res.status(404).json({
+                message: "User not found !!!",
+                flag: -1
+            })
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: "Error in server !!!",
+            data: error.message,
+            flag: -1
+        })
+    }
+}
+
 const userlogin = async (req, res) => {
 
     try {
@@ -335,5 +365,6 @@ module.exports = {
     getAllOrders,
     addToFavorites,
     removeFromFavorites,
-    getUserFavourites
+    getUserFavourites,
+    updateUser
 }

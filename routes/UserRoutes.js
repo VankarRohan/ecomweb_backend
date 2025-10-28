@@ -4,6 +4,7 @@ const verifytoken = require("../middleware/VerifyUser")
 
 router.post("/user",userController.userRegister)
 router.delete("/user/:id",userController.deleteuser)
+router.put("/user/:id",userController.updateUser)
 router.post("/user/login",userController.userlogin)
 
 router.post("/cart",verifytoken.verifyToken, userController.addtoCart)
