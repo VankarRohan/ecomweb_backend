@@ -6,6 +6,7 @@ const orderSchema = require("../models/OrderModel")
 const fs = require("fs");
 const path = require("path");
 dotenv.config();
+const multer = require("multer");
 
 const userRegister = async (req, res) => {
 
@@ -96,6 +97,23 @@ const updateUser = async (req, res) => {
     }
 }
 
+const uploadDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// configure multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+    },
+});
+
+const upload = multer({ storage });
 
 const uploadProfileImage = async (req, res) => {
     try {
@@ -444,5 +462,6 @@ module.exports = {
     getUserFavourites,
     updateUser,
     getUser,
-    uploadProfileImage
+    uploadProfileImage,
+    upload
 }
