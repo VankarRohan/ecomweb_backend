@@ -8,7 +8,7 @@ dotenv.config();
 const userRegister = async (req, res) => {
 
     try {
-        const { name, email, img, password } = req.body;
+        const { firstname,lastname,phone, email, img, password } = req.body;
         const existinguser = await userSchema.findOne({ email });
 
         if (existinguser) {
@@ -19,7 +19,9 @@ const userRegister = async (req, res) => {
 
         const user = new userSchema({
 
-            name,
+            firstname,
+            lastname,
+            phone,
             email,
             password: hashedPassword,
             img
