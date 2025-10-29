@@ -3,12 +3,14 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const userSchema = require("../models/UserModel")
 const orderSchema = require("../models/OrderModel")
+const fs = require("fs");
+const path = require("path");
 dotenv.config();
 
 const userRegister = async (req, res) => {
 
     try {
-        const { firstname,lastname,phone, email, img, password } = req.body;
+        const { firstname, lastname, phone, email, img, password } = req.body;
         const existinguser = await userSchema.findOne({ email });
 
         if (existinguser) {
@@ -44,6 +46,8 @@ const userRegister = async (req, res) => {
     }
 
 }
+
+
 const getUser = async (req, res) => {
 
     try {
@@ -60,6 +64,8 @@ const getUser = async (req, res) => {
         });
     }
 }
+
+
 const updateUser = async (req, res) => {
 
     try {
@@ -89,6 +95,59 @@ const updateUser = async (req, res) => {
         })
     }
 }
+
+
+const uploadProfileImage = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        
+        if (!req.file) {
+            return res.status(400).json({
+                message: "No image file uploaded",
+                flag: -1,
+            });
+        }
+
+        const imagePath = `/uploads/${req.file.filename}`;
+
+        
+        const user = await userSchema.findById(userId);
+        if (!user) {
+           
+            fs.unlinkSync(req.file.path);
+            return res.status(404).json({
+                message: "User not found",
+                flag: -1,
+            });
+        }
+
+        
+        if (user.img && user.img.startsWith("/uploads/")) {
+            const oldImagePath = path.join(process.cwd(), user.img);
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+
+        
+        user.img = imagePath;
+        await user.save();
+
+        res.status(200).json({
+            message: "Profile image updated successfully",
+            data: user,
+            flag: 1,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error uploading image",
+            error: error.message,
+            flag: -1,
+        });
+    }
+};
+
 
 const userlogin = async (req, res) => {
 
@@ -384,5 +443,6 @@ module.exports = {
     removeFromFavorites,
     getUserFavourites,
     updateUser,
-    getUser
+    getUser,
+    uploadProfileImage
 }

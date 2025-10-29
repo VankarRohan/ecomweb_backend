@@ -15,6 +15,7 @@ app.use(express.json())
 
 app.use("/users",userRoutes)
 app.use("/products",productRoutes)
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 
 mongoose.connect(process.env.MONGO_URI, {
