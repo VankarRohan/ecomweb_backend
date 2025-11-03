@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const userSchema = require("../models/UserModel")
 const orderSchema = require("../models/OrderModel")
+// const orderSchema = require("../")
 const fs = require("fs");
 const path = require("path");
 dotenv.config();
@@ -97,7 +98,7 @@ const updateUser = async (req, res) => {
     }
 }
 
-const uploadDir = path.join(process.cwd(), "uploads");
+const uploadDir = path.join(process.cwd(), "./uploads");
 if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -118,6 +119,7 @@ const upload = multer({ storage });
 const uploadProfileImage = async (req, res) => {
     try {
         const userId = req.params.id;
+         console.log("Received file:", req.file);
         
         if (!req.file) {
             return res.status(400).json({
