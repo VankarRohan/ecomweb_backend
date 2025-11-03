@@ -8,6 +8,9 @@ const fs = require("fs");
 const path = require("path");
 dotenv.config();
 const multer = require("multer");
+const { v2: cloudinary } = require("cloudinary");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 
 const userRegister = async (req, res) => {
 
@@ -98,29 +101,28 @@ const updateUser = async (req, res) => {
     }
 }
 
-const uploadDir = path.join(process.cwd(), "./uploads");
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// configure multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, uploadDir);
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+// 🧺 Configure multer-storage-cloudinary
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder: "profile_images", // Cloudinary folder name
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
     },
 });
 
 const upload = multer({ storage });
 
+// 🧩 Upload Controller
 const uploadProfileImage = async (req, res) => {
     try {
         const userId = req.params.id;
-         console.log("Received file:", req.file);
-        
+
         if (!req.file) {
             return res.status(400).json({
                 message: "No image file uploaded",
@@ -128,29 +130,24 @@ const uploadProfileImage = async (req, res) => {
             });
         }
 
-        const imagePath = `/uploads/${req.file.filename}`;
+        // 🧠 Cloudinary auto-returns URL in req.file.path
+        const imageUrl = req.file.path;
 
-        
         const user = await userSchema.findById(userId);
         if (!user) {
-           
-            fs.unlinkSync(req.file.path);
             return res.status(404).json({
                 message: "User not found",
                 flag: -1,
             });
         }
 
-        
-        if (user.img && user.img.startsWith("/uploads/")) {
-            const oldImagePath = path.join(process.cwd(), user.img);
-            if (fs.existsSync(oldImagePath)) {
-                fs.unlinkSync(oldImagePath);
-            }
+        // If old image exists, delete from Cloudinary (optional improvement)
+        if (user.img && user.img.includes("cloudinary.com")) {
+            const publicId = user.img.split("/").pop().split(".")[0];
+            await cloudinary.uploader.destroy(`profile_images/${publicId}`);
         }
 
-        
-        user.img = imagePath;
+        user.img = imageUrl;
         await user.save();
 
         res.status(200).json({
