@@ -1,14 +1,14 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const encrypt = require("../utils/Encrypt")
 const userSchema = require("../models/UserModel")
 const orderSchema = require("../models/OrderModel")
-// const orderSchema = require("../")
+dotenv.config();
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-dotenv.config();
-const multer = require("multer");
-const { v2: cloudinary } = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 
@@ -122,6 +122,8 @@ const upload = multer({ storage });
 const uploadProfileImage = async (req, res) => {
     try {
         const userId = req.params.id;
+        console.log(process.env.CLOUDINARY_API_KEY);
+
 
         if (!req.file) {
             return res.status(400).json({
@@ -446,6 +448,64 @@ const getUserFavourites = async (req, res) => {
     }
 };
 
+const isUserExist = async (req, res) => {
+
+    try {
+        const email = req.body.email
+        console.log(email)
+
+        const isUser = await userSchema.findOne({ email: email })
+
+        if (isUser) {
+
+            res.status(200).json({
+                message: "User found",
+                flag: 1,
+                data: isUser
+            })
+
+
+        } else {
+
+            res.status(404).json({
+                message: "User not found",
+                flag: -1
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "error in server",
+            flag: -1,
+            message: error
+        })
+
+    }
+}
+
+
+const resetpwd = async (req, res) => {
+
+    const email = req.body.email
+    const password = req.body.password
+
+    const hashedpwd = encrypt.encryptpassword(password)
+    try {
+        const updatepwd = await userSchema.findOneAndUpdate({ email: email }, { $set: { password: hashedpwd } })
+        res.status(200).json({
+            message: "Password updated successfully",
+            flag: 1,
+        })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            message: "Error in updating password",
+            data: error
+        })
+    }
+
+}
 
 module.exports = {
     userRegister,
@@ -462,5 +522,7 @@ module.exports = {
     updateUser,
     getUser,
     uploadProfileImage,
-    upload
+    upload,
+    isUserExist,
+    resetpwd
 }

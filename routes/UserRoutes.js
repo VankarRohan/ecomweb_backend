@@ -11,6 +11,8 @@ router.delete("/user/:id", userController.deleteuser)
 router.put("/user/:id", userController.updateUser)
 router.post("/profile/:id", userController.upload.single("image"), userController.uploadProfileImage);
 router.post("/user/login", userController.userlogin)
+router.post("/user/isuser",userController.isUserExist)
+router.post("/user/resetpassword",userController.resetpwd)
 
 router.post("/cart", verifytoken.verifyToken, userController.addtoCart)
 router.patch("/cart", verifytoken.verifyToken, userController.removeFromCart)
