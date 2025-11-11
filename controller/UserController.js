@@ -487,14 +487,21 @@ const resetpwd = async (req, res) => {
 
     const email = req.body.email
     const password = req.body.password
-
-    const hashedpwd = encrypt.encryptpassword(password)
+    console.log(email, password)
+    const hashedpwd = await encrypt.encryptpassword(password)
     try {
         const updatepwd = await userSchema.findOneAndUpdate({ email: email }, { $set: { password: hashedpwd } })
-        res.status(200).json({
-            message: "Password updated successfully",
-            flag: 1,
-        })
+
+        if (!updatepwd) {
+            return res.status(404).json({ message: "User not found", flag: -1 });
+        }
+        else {
+
+            res.status(200).json({
+                message: "Password updated successfully",
+                flag: 1,
+            })
+        }
 
     } catch (error) {
         console.log(error)
