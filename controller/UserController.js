@@ -454,22 +454,21 @@ const isUserExist = async (req, res) => {
         const email = req.body.email
         console.log(email)
 
-        const isUser = await userSchema.findOne({ email: email })
+        const isUser = await userSchema.findOne({ email });
+        console.log(isUser)
 
-        if (isUser) {
+        if (!isUser) {
+            res.status(404).json({
+                message: "User not found",
+                flag: -1
+            })
+
+        } else {
 
             res.status(200).json({
                 message: "User found",
                 flag: 1,
                 data: isUser
-            })
-
-
-        } else {
-
-            res.status(404).json({
-                message: "User not found",
-                flag: -1
             })
         }
     } catch (error) {
