@@ -225,39 +225,44 @@ const deleteuser = async (req, res) => {
 }
 
 const addtoCart = async (req, res) => {
-
     try {
-
         const { productId, quantity, color, size } = req.body;
         const userJWT = req.user;
         const user = await userSchema.findById(userJWT.id);
-        const existingCartItemIndex = user.cart.findIndex((item) =>
-            item?.product?.equals(productId) &&
-            item?.color === color &&
-            item?.size === size
-        );
-        if (existingCartItemIndex !== -1) {
 
+       
+        const existingCartItemIndex = user.cart.findIndex((item) =>
+            item.product.equals(productId) &&
+            (item.color || null) === (color || null) &&
+            (item.size || null) === (size || null)
+        );
+
+        if (existingCartItemIndex !== -1) {
+           
             user.cart[existingCartItemIndex].quantity += quantity;
         } else {
-
-            user.cart.push({ product: productId, quantity, color, size });
+            
+            user.cart.push({
+                product: productId,
+                quantity,
+                color: color || null,
+                size: size || null,
+            });
         }
+
         await user.save();
 
-        return res
-            .status(200)
-            .json({
-                message: "Product added to cart successfully",
-                user
-            });
-
+        return res.status(200).json({
+            message: "Product added to cart successfully",
+            user,
+        });
 
     } catch (error) {
-        console.log(error)
-
+        console.log(error);
+        return res.status(500).json({ message: "Server error" });
     }
-}
+};
+
 
 const removeFromCart = async (req, res) => {
 
