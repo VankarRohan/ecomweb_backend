@@ -33,8 +33,8 @@ const UserSchema = new mongoose.Schema(
         {
           product: { type: mongoose.Schema.Types.ObjectId, ref: "Products" },
           quantity: { type: Number, default: 1 ,required: true},
-          color: { type: String, default: null ,required: true},
-          size: { type: String, default: null,required: true },
+          color: { type: String},
+          size: { type: String},
         },
       ],
       default: [],
